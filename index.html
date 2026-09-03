@@ -4951,11 +4951,16 @@
                 tbody.innerHTML = '<tr><td colspan="2" class="no-games">No registered usernames</td></tr>';
                 return;
             }
-            tbody.innerHTML = entries.map(([id, entry]) => `
+            tbody.innerHTML = entries.map(([id, entry]) => {
+                const losses = entry.losses || 0;
+                const livesLeft = Math.max(3 - losses, 0);
+                const livesIndicator = '❤️'.repeat(livesLeft) + '🖤'.repeat(3 - livesLeft);
+                return `
                 <tr>
                     <td>${entry.username}</td>
-                    <td><button class="action-btn delete" onclick="deleteRegisteredUsername('${id}')">🗑️</button></td>
-                </tr>`).join('');
+                    <td><span class="lives-indicator">${livesIndicator}</span> <button class="action-btn delete" onclick="deleteRegisteredUsername('${id}')">🗑️</button></td>
+                </tr>`;
+            }).join('');
         } else {
             tbody.innerHTML = '<tr><td colspan="2" class="no-games">No registered usernames</td></tr>';
         }
