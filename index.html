@@ -5895,13 +5895,13 @@
             await recordGameHistoryOnce(winnerUsername, loserUsername, reason, winnerIP, loserIP, isDraw);
         }
 
-        // ── Best-of-3 auto-restart (online multiplayer only): rounds 1 and 2
-        // restart automatically, with neither player needing to accept a
-        // rematch. The winner page only appears once 3 rounds have been
-        // played, declaring whoever won the most rounds as the winner. A
-        // genuine opponent disconnect always ends the match immediately
-        // instead of waiting for 3 rounds, since there is no one left to
-        // keep playing rounds with. ──
+        // ── Best-of-3 auto-restart (online multiplayer only): rounds restart
+        // automatically, with neither player needing to accept a rematch.
+        // The winner page only appears once a player's score actually
+        // reaches 3, declaring that player the winner. A genuine opponent
+        // disconnect always ends the match immediately instead of waiting
+        // for a score of 3, since there is no one left to keep playing
+        // rounds with. ──
         let showFinalWinnerScreen = true;
         let finalWinnerUsername = isDraw ? 'DRAW' : winnerUsername;
         const isAbandonment = reason === 'Disconnect';
@@ -5920,7 +5920,11 @@
             roundsPlayed = newRoundsPlayed;
             updateRoundScoreDisplay();
 
-            if (!isAbandonment && newRoundsPlayed < 3) {
+            // ── FIX: the match only ends once a player's score actually reaches
+            // 3, not simply because 3 rounds have been played — so if the score
+            // is e.g. 2-1 after 3 rounds, the series keeps going instead of
+            // ending early. ──
+            if (!isAbandonment && newScores.p1Score < 3 && newScores.p2Score < 3) {
                 showFinalWinnerScreen = false;
                 await window.firebaseUpdate(roomRef, {
                     winner: isDraw ? 0 : winningPlayerNumber,
@@ -5950,8 +5954,8 @@
                     seriesOver: true
                 });
             } else {
-                // Round 3 has just finished — decide the overall best-of-3
-                // winner by comparing total round wins.
+                // A player's score has just reached 3 — decide the overall
+                // best-of-3 winner by comparing total round wins.
                 const p1Username = myPlayerNumber === 1 ? player1Username : opponentUsername;
                 const p2Username = myPlayerNumber === 2 ? player1Username : opponentUsername;
                 let matchWinningPlayerNumber = 0;
@@ -7505,10 +7509,10 @@
                 // is preserved across rematches within the same best-of-3 series.
             };
 
-            // A full best-of-3 series (3 rounds) just finished — start the
-            // next series fresh instead of carrying the finished series'
-            // round count and scores into it.
-            if (roundsPlayed >= 3) {
+            // A full best-of-3 series just finished (someone's score reached
+            // 3) — start the next series fresh instead of carrying the
+            // finished series' round count and scores into it.
+            if (myScore >= 3 || opponentScore >= 3) {
                 roundsPlayed = 0;
                 myScore = 0;
                 opponentScore = 0;
