@@ -11820,7 +11820,15 @@
 
             const newScores = applyScoreForResult(isDraw ? 0 : winningPlayerNumber);
 
-            const newRoundsPlayed = (roundsPlayed || 0) + 1;
+            // ── FIX: use the authoritative roundsPlayed value from Firebase (not
+            // the local mirror, which can be stale) so that ending a round —
+            // including via surrender — always advances the best-of-3 series by
+            // exactly one round instead of ever jumping ahead and ending the
+            // whole match before 3 rounds have actually been played. ──
+            const roundsPlayedSnapshot = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'rooms/' + currentRoomId + '/roundsPlayed'));
+            const authoritativeRoundsPlayed = typeof roundsPlayedSnapshot.val() === 'number' ? roundsPlayedSnapshot.val() : (roundsPlayed || 0);
+
+            const newRoundsPlayed = authoritativeRoundsPlayed + 1;
 
             roundsPlayed = newRoundsPlayed;
 
