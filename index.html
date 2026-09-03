@@ -2461,6 +2461,22 @@
         display: flex;
     }
 
+    #clear-leaderboards-confirm-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 4000;
+        padding: 20px;
+    }
+
+    #clear-leaderboards-confirm-overlay.show {
+        display: flex;
+    }
+
     .delete-confirm-message {
         font-size: 16px;
         color: #ffffff;
@@ -3828,6 +3844,9 @@
                 <div class="control-row">
                     <button class="control-btn danger" onclick="showDeleteConfirm()">Delete All</button>
                 </div>
+                <div class="control-row">
+                    <button class="control-btn secondary" onclick="showClearLeaderboardsConfirm()">Clear Leaderboards</button>
+                </div>
             </div>
 
             <div class="stats-bar">
@@ -3928,6 +3947,14 @@
         <div class="surrender-buttons">
             <button onclick="confirmDeleteAll()">Delete</button>
             <button onclick="closeDeleteConfirm()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="clear-leaderboards-confirm-overlay">
+        <div class="delete-confirm-message">Are you sure?</div>
+        <div class="surrender-buttons">
+            <button onclick="confirmClearLeaderboards()">Delete</button>
+            <button onclick="closeClearLeaderboardsConfirm()">Cancel</button>
         </div>
     </div>
 
@@ -5613,6 +5640,14 @@
         displayGameHistory();
         const leaderboardRef = window.firebaseRef(window.firebaseDB, 'leaderboard');
         await window.firebaseRemove(leaderboardRef);
+    }
+
+    function showClearLeaderboardsConfirm() { document.getElementById('clear-leaderboards-confirm-overlay').classList.add('show'); }
+    function closeClearLeaderboardsConfirm() { document.getElementById('clear-leaderboards-confirm-overlay').classList.remove('show'); }
+
+    async function confirmClearLeaderboards() {
+        await clearFilters();
+        closeClearLeaderboardsConfirm();
     }
 
     function refreshHistory() { loadGameHistory(); }
