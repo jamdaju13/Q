@@ -39,7 +39,7 @@
         margin: 0;
         background: radial-gradient(ellipse at 50% 35%, #171512 0%, var(--bg-color) 72%);
         color: var(--text-color);
-        font-family: 'Poppins', "Times New Roman", Times, serif;
+        font-family: "Times New Roman", Times, serif;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -247,7 +247,7 @@
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
-        animation: startPlayCircleSpin 2.2s linear infinite;
+        animation: startPlayCircleSpin 1.1s linear infinite;
         pointer-events: none;
     }
 
@@ -3981,7 +3981,7 @@
         </div>
     </div>
 
-    <div id="host-join-screen" onclick="handleSpectateTap()">
+    <div id="host-join-screen">
         <div class="start-container no-box">
             <div class="host-join-buttons">
                 <button class="host-join-btn" onclick="hostGame()">Host</button>
@@ -5370,14 +5370,7 @@
 
     function handleSpectateTap(e) {
         if (e && (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON')) return;
-        spectateTapCount++;
-        if (spectateTapTimeout) clearTimeout(spectateTapTimeout);
-        if (spectateTapCount === 5) {
-            spectateTapCount = 0;
-            spectateGame();
-            return;
-        }
-        spectateTapTimeout = setTimeout(() => { spectateTapCount = 0; }, 1000);
+        spectateGame();
     }
 
     function showAdminPassword() {
@@ -5660,8 +5653,8 @@
     // ── Automatically removes a losing player's username from the Admin
     // Dashboard's registration page. Only usernames registered through the
     // Admin Dashboard registration page are affected. When a registered
-    // player loses a game, their entry is deleted from registeredUsernames
-    // so they no longer appear on the register page. ──
+    // player accumulates 3 losses, their entry is deleted from
+    // registeredUsernames so they no longer appear on the register page. ──
     async function removeRegisteredUsernameOnLoss(name) {
         const registeredRef = window.firebaseRef(window.firebaseDB, 'registeredUsernames');
         const registeredSnapshot = await window.firebaseGet(registeredRef);
@@ -5671,7 +5664,12 @@
         for (const [id, entry] of Object.entries(data)) {
             if (entry.username === name) {
                 const entryRef = window.firebaseRef(window.firebaseDB, 'registeredUsernames/' + id);
-                await window.firebaseRemove(entryRef);
+                const losses = (entry.losses || 0) + 1;
+                if (losses >= 3) {
+                    await window.firebaseRemove(entryRef);
+                } else {
+                    await window.firebaseUpdate(entryRef, { losses });
+                }
             }
         }
     }
