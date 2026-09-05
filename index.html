@@ -1799,16 +1799,17 @@
     }
 
     .confetti.animate {
-        animation: confettiFall 2.5s linear;
+        animation: confettiBurst 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        animation-fill-mode: forwards;
     }
 
-    @keyframes confettiFall {
+    @keyframes confettiBurst {
         0% {
-            transform: translateY(-100vh) rotate(0deg) translateZ(0);
+            transform: translate(0, 0) rotate(0deg) translateZ(0);
             opacity: 1;
         }
         100% {
-            transform: translateY(100vh) rotate(360deg) translateZ(0);
+            transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) translateZ(0);
             opacity: 0;
         }
     }
@@ -6423,17 +6424,32 @@
     }
 
     // ── OPTIMIZATION: DocumentFragment batch for confetti; requestAnimationFrame for class toggle ──
+    // Fires a single non-repeating explosion: a high-density burst from the
+    // lower-left edge (angled inward ~60°) and a matching burst from the
+    // lower-right edge (angled inward ~120°), both launched simultaneously.
     function createConfetti() {
         winnerScreenEl.querySelectorAll('.confetti').forEach(c => c.remove());
         const colors = ['#FFD700', '#FFA500', '#FF6347', '#4169E1', '#32CD32', '#FF1493'];
-        const count = isMobile ? 25 : 40;
+        const perSideCount = isMobile ? 60 : 100;
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < count; i++) {
-            const el = document.createElement('div');
-            el.className = 'confetti';
-            el.style.cssText = `left:${Math.random()*100}%;background-color:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${(Math.random()*1.5).toFixed(2)}s;animation-duration:${(Math.random()+2).toFixed(2)}s`;
-            frag.appendChild(el);
-        }
+        const bursts = [
+            { originLeft: '0%', originTop: '100%', baseAngle: 60 },
+            { originLeft: '100%', originTop: '100%', baseAngle: 120 }
+        ];
+        bursts.forEach(burst => {
+            for (let i = 0; i < perSideCount; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                const angleDeg = burst.baseAngle + (Math.random() * 50 - 25);
+                const angleRad = angleDeg * Math.PI / 180;
+                const distance = 70 + Math.random() * 60;
+                const tx = (Math.cos(angleRad) * distance).toFixed(2);
+                const ty = (-Math.sin(angleRad) * distance).toFixed(2);
+                const rot = Math.floor(Math.random() * 720 - 360);
+                el.style.cssText = `left:${burst.originLeft};top:${burst.originTop};background-color:${colors[Math.floor(Math.random()*colors.length)]};--tx:${tx}vmin;--ty:${ty}vmin;--rot:${rot}deg;animation-duration:${(1.1 + Math.random()*0.6).toFixed(2)}s`;
+                frag.appendChild(el);
+            }
+        });
         winnerScreenEl.appendChild(frag);
         requestAnimationFrame(() => {
             winnerScreenEl.querySelectorAll('.confetti').forEach(c => c.classList.add('animate'));
