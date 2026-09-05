@@ -1805,6 +1805,11 @@
         color: #ffffff;
     }
 
+    #rematch-btn {
+        width: fit-content;
+        align-self: center;
+    }
+
     .confetti {
         position: absolute;
         width: 8px;
@@ -4338,7 +4343,7 @@
         <div class="winner-label">WINNER</div>
         <div class="winner-reason" id="winner-reason"></div>
         <div class="winner-buttons">
-            <button class="winner-btn" onclick="requestRematch()">REMATCH</button>
+            <button class="winner-btn" id="rematch-btn" onclick="requestRematch()">REMATCH</button>
             <button class="winner-btn secondary" id="main-menu-btn" onclick="goToMainMenu()">MAIN MENU</button>
         </div>
         <div class="winner-buttons" id="spectator-winner-buttons" style="display: none;">
