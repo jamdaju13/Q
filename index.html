@@ -1792,6 +1792,19 @@
         color: #000000;
     }
 
+    #main-menu-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        border-radius: 0;
+        width: auto;
+    }
+
+    #main-menu-btn:hover {
+        background: none;
+        color: #ffffff;
+    }
+
     .confetti {
         position: absolute;
         width: 8px;
@@ -4326,7 +4339,7 @@
         <div class="winner-reason" id="winner-reason"></div>
         <div class="winner-buttons">
             <button class="winner-btn" onclick="requestRematch()">REMATCH</button>
-            <button class="winner-btn secondary" style="border: none;" onclick="goToMainMenu()">MAIN MENU</button>
+            <button class="winner-btn secondary" id="main-menu-btn" onclick="goToMainMenu()">MAIN MENU</button>
         </div>
         <div class="winner-buttons" id="spectator-winner-buttons" style="display: none;">
             <button class="winner-btn secondary" onclick="goToMainMenu()">MENU</button>
