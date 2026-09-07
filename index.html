@@ -37,7 +37,7 @@
 
     body {
         margin: 0;
-        background: radial-gradient(ellipse at 50% 35%, #171512 0%, var(--bg-color) 72%);
+        background: #000000;
         color: var(--text-color);
         font-family: "Times New Roman", Times, serif;
         display: flex;
@@ -723,14 +723,17 @@
         pointer-events: none;
     }
 
-    #room-id-corner {
+    #hud-top-left {
         position: fixed;
         top: 16px;
         left: 16px;
         z-index: 50;
-        background: rgba(26, 26, 26, 0.85);
-        border: 1px solid #333;
-        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #room-id-corner {
         padding: 8px 14px;
         font-size: 13px;
         font-weight: 600;
@@ -755,9 +758,6 @@
         top: 16px;
         right: 16px;
         z-index: 50;
-        background: rgba(26, 26, 26, 0.85);
-        border: 1px solid #333;
-        border-radius: 10px;
         padding: 8px 14px;
         font-size: 13px;
         font-weight: 600;
@@ -1293,11 +1293,11 @@
     }
 
     .rematch-container {
-        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
-        border: 2px solid #795548;
-        border-radius: 20px;
-        padding: 50px 60px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(121, 85, 72, 0.3);
+        background: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
         max-width: 500px;
         width: 90%;
         text-align: center;
@@ -1358,6 +1358,8 @@
 
     .rematch-accept-btn {
         padding: 16px 40px;
+        min-width: 160px;
+        text-align: center;
         background: linear-gradient(135deg, #795548 0%, #4E342E 100%);
         color: #ffffff;
         border: 2px solid #A0522D;
@@ -1401,6 +1403,8 @@
 
     .rematch-decline-btn {
         padding: 16px 40px;
+        min-width: 160px;
+        text-align: center;
         background: linear-gradient(135deg, #424242 0%, #1a1a1a 100%);
         color: #ffffff;
         border: 2px solid #d32f2f;
@@ -1460,11 +1464,11 @@
     }
 
     .rematch-waiting-container {
-        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
-        border: 2px solid #795548;
-        border-radius: 20px;
-        padding: 50px 60px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(121, 85, 72, 0.3);
+        background: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
         max-width: 500px;
         width: 90%;
         text-align: center;
@@ -1566,12 +1570,12 @@
 
         .rematch-actions {
             flex-direction: column;
+            align-items: center;
             gap: 12px;
         }
 
         .rematch-accept-btn,
         .rematch-decline-btn {
-            width: 100%;
             padding: 14px 32px;
             font-size: 14px;
         }
@@ -1628,6 +1632,7 @@
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
         padding: 40px 20px;
+        will-change: opacity;
     }
 
     #winner-screen.show {
@@ -1665,6 +1670,7 @@
         overflow: visible;
         word-break: keep-all;
         line-height: 1.2;
+        will-change: transform, opacity;
     }
 
     /* Username slides in from the right and settles to the left */
@@ -1694,6 +1700,7 @@
         opacity: 1;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
+        will-change: transform, opacity;
     }
 
     /* "WINNER" label slides in from the left and settles to the right */
@@ -1774,6 +1781,7 @@
         padding: 0;
         border-radius: 0;
         width: auto;
+        align-self: center;
         touch-action: manipulation;
     }
 
@@ -1801,6 +1809,7 @@
     .confetti.animate {
         animation: confettiBurst 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         animation-fill-mode: forwards;
+        will-change: transform, opacity;
     }
 
     @keyframes confettiBurst {
@@ -3510,8 +3519,11 @@
         }
 
         #room-id-corner {
-            top: 10px;
-            left: 10px;
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+
+        #round-score-corner {
             padding: 6px 10px;
             font-size: 11px;
         }
@@ -3547,8 +3559,11 @@
         }
 
         #room-id-corner {
-            top: 8px;
-            left: 8px;
+            padding: 5px 8px;
+            font-size: 10px;
+        }
+
+        #round-score-corner {
             padding: 5px 8px;
             font-size: 10px;
         }
@@ -4246,7 +4261,9 @@
     </div>
 
     <div id="game-screen">
+        <div id="hud-top-left">
         <div id="room-id-corner">ROOM <span class="room-id-corner-value" id="room-id-corner-value">---</span></div>
+        </div>
         <div id="round-score-corner">SCORE: <span class="round-score-corner-value" id="round-score-corner-value">0/3</span></div>
         <div id="inactivity-timer">30</div>
         <div id="spectator-white-name" class="spectator-player-name" style="display: none;"></div>
@@ -4434,6 +4451,12 @@
     // accurate in real time even if the tab is closed, the player disconnects,
     // or the game is exited entirely.
     let currentInactivityEndTime = null;
+    // ── LATENCY HANDLING: difference (ms) between the Firebase server's clock
+    // and this client's local clock, kept live via initServerTimeSync(). Used
+    // via getServerTime() anywhere a turn deadline is computed/compared so
+    // that network latency and client clock drift don't cause the timer to
+    // run early/late relative to the opponent's client. ──
+    let serverTimeOffset = 0;
     let currentTab = 'history';
     let leaderboardListener = null;
     let allLeaderboardData = [];
@@ -4634,6 +4657,27 @@
             deduped.push(p);
         });
         return deduped;
+    }
+
+    // ── LATENCY HANDLING: subscribes to Firebase's special '.info/serverTimeOffset'
+    // location, which continuously streams the live difference (ms) between this
+    // client's local clock and the Firebase server's clock — updating automatically
+    // as network conditions change. getServerTime() below uses this offset so that
+    // turn-timer deadlines are computed against real server time instead of a
+    // possibly-skewed/laggy local clock, keeping the countdown synchronized and
+    // responsive for both players regardless of individual connection latency. ──
+    function initServerTimeSync() {
+        const offsetRef = window.firebaseRef(window.firebaseDB, '.info/serverTimeOffset');
+        window.firebaseOnValue(offsetRef, (snapshot) => {
+            const val = snapshot.val();
+            if (typeof val === 'number') serverTimeOffset = val;
+        });
+    }
+
+    // Returns the current estimated server time (ms since epoch), correcting
+    // local Date.now() by the live-synced serverTimeOffset.
+    function getServerTime() {
+        return Date.now() + serverTimeOffset;
     }
 
     // ── ONLINE PLAYERS INDICATOR: registers this client's presence in Firebase
@@ -5582,7 +5626,7 @@
 
         if (isMyTurn()) {
             if (currentInactivityEndTime === null) {
-                currentInactivityEndTime = Date.now() + INACTIVITY_DURATION_MS;
+                currentInactivityEndTime = getServerTime() + INACTIVITY_DURATION_MS;
             }
             saveInactivityEndTime(currentInactivityEndTime);
         } else {
@@ -5606,11 +5650,11 @@
             }
 
             if (currentInactivityEndTime === null) {
-                currentInactivityEndTime = Date.now() + INACTIVITY_DURATION_MS;
+                currentInactivityEndTime = getServerTime() + INACTIVITY_DURATION_MS;
                 saveInactivityEndTime(currentInactivityEndTime);
             }
 
-            const remainingMs = currentInactivityEndTime - Date.now();
+            const remainingMs = currentInactivityEndTime - getServerTime();
             inactivityTimer = Math.max(0, Math.ceil(remainingMs / 1000));
             updateInactivityDisplay();
 
@@ -5629,7 +5673,7 @@
 
     function resetInactivityTimer() {
         if (isMyTurn()) {
-            currentInactivityEndTime = Date.now() + INACTIVITY_DURATION_MS;
+            currentInactivityEndTime = getServerTime() + INACTIVITY_DURATION_MS;
             saveInactivityEndTime(currentInactivityEndTime);
         } else {
             currentInactivityEndTime = null;
@@ -6456,6 +6500,17 @@
         });
     }
 
+    // ── OPTIMIZATION: remove each confetti piece from the DOM as soon as its own
+    // GPU-driven burst animation finishes, instead of leaving up to 200 finished
+    // nodes sitting around until the next win — keeps later winner-screen
+    // animations (text slide-ins, button transitions) free of extra layout/paint
+    // overhead from stale elements. Delegated once, so no per-piece listeners. ──
+    winnerScreenEl.addEventListener('animationend', (e) => {
+        if (e.target.classList && e.target.classList.contains('confetti')) {
+            e.target.remove();
+        }
+    });
+
     function startGame() {
         if (!player1Username) {
             openProfile();
@@ -6725,13 +6780,16 @@
     async function generateUniqueRoomId() {
         let roomId;
         let isUnique = false;
-        while (!isUnique) {
+        let attempts = 0;
+        while (!isUnique && attempts < 1000) {
+            attempts++;
             roomId = Math.floor(Math.random() * 900) + 100;
             if (roomId === 666) continue;
             const roomRef = window.firebaseRef(window.firebaseDB, 'rooms/' + roomId);
             const snapshot = await window.firebaseGet(roomRef);
             if (!snapshot.exists()) isUnique = true;
         }
+        if (!isUnique) throw new Error('Could not generate a unique room ID.');
         return roomId.toString();
     }
 
@@ -8097,7 +8155,7 @@
         // immediately — with zero delay — instead of resuming a countdown. ──
         const savedInactivity = readInactivityEndTime();
         if (isMyTurn() && savedInactivity && savedInactivity.roomId === savedRoomId && typeof savedInactivity.endTime === 'number') {
-            if (Date.now() >= savedInactivity.endTime) {
+            if (getServerTime() >= savedInactivity.endTime) {
                 clearInactivityEndTime();
                 currentInactivityEndTime = null;
                 await handleInactivityTimeout();
@@ -8120,6 +8178,7 @@
     // Run reconnection check on page load
     window.addEventListener('load', async () => {
         initOnlinePresence();
+        initServerTimeSync();
         listenForUsernameReset();
         loadPublicLeaderboard();
         await ipPromise;
