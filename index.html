@@ -1215,6 +1215,11 @@ window.Net = (function(){
   function startTurnTimer(deadline){
     currentTurnDeadline = deadline || null;
     clearInterval(turnTimerInterval);
+    if (Net.mode === 'online' && !deadline){
+      turnTimeLeft = TURN_TIME_LIMIT;
+      updateTurnTimerDisplay();
+      return;
+    }
     if (Net.mode === 'online' && deadline){
       turnTimeLeft = Math.max(0, Math.ceil((deadline - Net.now()) / 1000));
       updateTurnTimerDisplay();
@@ -1945,7 +1950,9 @@ window.Net = (function(){
       Net.onGuestJoined(() => {
         hostScreen.classList.remove('open');
         setupOnlineListeners();
-        startMatch();
+        const deadline = Net.now() + TURN_TIME_LIMIT*1000;
+        Net.pushState(board, current, { turnDeadline: deadline });
+        startMatch(deadline);
       });
     }).catch(err => { hostStatus.textContent = 'Could not create room: ' + err.message; });
   });
