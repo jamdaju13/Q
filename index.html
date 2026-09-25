@@ -1893,7 +1893,7 @@ window.Net = (function(){
   const roomIdInput = document.getElementById('roomIdInput');
   const joinBackBtn = document.getElementById('joinBackBtn');
   const joinConfirmBtn = document.getElementById('joinConfirmBtn');
-  function startMatch(){
+  function startMatch(deadline){
     preloadSounds();
     modeScreen.classList.remove('open');
     gameWrap.classList.remove('hiddenWrap');
@@ -1913,7 +1913,7 @@ window.Net = (function(){
       document.getElementById('surrenderBubble').style.right = '';
       document.getElementById('surrenderBubble').style.transform = '';
     }
-    startTurnTimer();
+    startTurnTimer(deadline);
   }
   playButton.addEventListener('click', () => {
     isAIGame = false;
@@ -2293,7 +2293,7 @@ window.Net = (function(){
       render();
       landingScreen.classList.add('hidden');
       setupOnlineListeners();
-      startMatch();
+      startMatch(data.state.turnDeadline);
     }).catch(() => { Net.clearRoomSession(); });
   })();
 })();
